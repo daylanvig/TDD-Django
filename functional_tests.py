@@ -11,6 +11,10 @@ class NewVisitorTest(unittest.TestCase):
         # User leaves website
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
 
     def test_can_start_a_list_and_retrieve_it(self):
         # User opens browser and navigates to homepage
@@ -31,15 +35,16 @@ class NewVisitorTest(unittest.TestCase):
         # "1. Clean kitchen" as item in list
         input_box.send_keys(Keys.ENTER)
         time.sleep(1)
-
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertTrue(any(row.text == '1. Clean kitchen' for row in rows))
+        self.check_for_row_in_list_table('1. Clean kitchen')
 
         # User enters another todo list item in box ("Do laundry")
+        input_box = self.browser.find_element_by_id('id_new_item')
+        input_box.send_keys('Do laundry')
+        input_box.send_keys(Keys.ENTER)
+        time.sleep(1)
 
-        # Page updates to show both items in list
-
+        self.check_for_row_in_list_table('1. Clean kitchen')
+        self.check_for_row_in_list_table('2. Do laundry')
         # User sees site generates unique URl to identify her/her list so it can be returned to.
         # There is some explanatory text for this.
 
