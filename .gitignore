@@ -3,3 +3,4 @@ docs.txt
 __pycache__
 *.pyc
 env/
+.vscode/

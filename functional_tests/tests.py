@@ -1,4 +1,4 @@
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
@@ -6,12 +6,15 @@ import time
 
 MAX_WAIT = 2
 
-class NewVisitorTest(LiveServerTestCase):
+
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()
 
     def tearDown(self):
         # User leaves website
+        # refresh stops a page forced exit error
+        self.browser.refresh()
         self.browser.quit()
 
     def wait_for_row_in_list_table(self, row_text):
@@ -33,7 +36,6 @@ class NewVisitorTest(LiveServerTestCase):
         input_box.send_keys(item_text)
         input_box.send_keys(Keys.ENTER)
 
-
     def test_can_start_a_list_for_one_user(self):
         # User opens browser and navigates to homepage
         self.browser.get(self.live_server_url)
@@ -44,7 +46,8 @@ class NewVisitorTest(LiveServerTestCase):
 
         # User is invited to enter a to-do item
         input_box = self.browser.find_element_by_id('id_new_item')
-        self.assertEqual(input_box.get_attribute('placeholder'), 'Enter a to-do item')
+        self.assertEqual(input_box.get_attribute(
+            'placeholder'), 'Enter a to-do item')
 
         # User enters "Clean kitchen" into text box
         # When user hits enter, page updates to show list
@@ -70,7 +73,8 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertRegex(user_list_url, '/lists/.+')
         # There is some explanatory text for this.
 
-        ## Begin new user session, clearing cookies so first user doesnt impact
+        # Begin new user session, clearing cookies so first user doesnt impact
+        self.browser.refresh()
         self.browser.quit()
         self.browser = webdriver.Chrome()
 
@@ -81,7 +85,7 @@ class NewVisitorTest(LiveServerTestCase):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Clean kitchen', page_text)
         self.assertNotIn('Do laundry', page_text)
-        
+
         # OtherUser enters todo item
         self.enter_new_item('Mow lawn')
         self.wait_for_row_in_list_table('1. Mow lawn')
@@ -96,3 +100,10 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotIn('Clean kitchen', page_text)
         self.assertNotIn('Do laundry', page_text)
 
+    def test_layout_and_styling(self):
+        # User goes to home page
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+        input_box = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            input_box.location['x'] + input_box.size['width']/2, 512, delta=10)
