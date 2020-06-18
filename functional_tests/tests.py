@@ -1,3 +1,4 @@
+import os
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -10,6 +11,9 @@ MAX_WAIT = 2
 class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()
+        staging_server = os.environ.get('STAGING_SERVER')
+        if staging_server:
+            self.live_server_url = 'http://' + staging_server
 
     def tearDown(self):
         # User leaves website
@@ -101,6 +105,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertNotIn('Do laundry', page_text)
 
     def test_layout_and_styling(self):
+        # Smoke test
         # User goes to home page
         self.browser.get(self.live_server_url)
         self.browser.set_window_size(1024, 768)

@@ -25,7 +25,8 @@ SECRET_KEY = 's&%lgi490r5rqh_s0k&+^83^95$ge&%t%^2198q^(1*ng=4+ui'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ['tdddjango.wl.r.appspot.com']
 
 
 # Application definition
@@ -73,13 +74,34 @@ WSGI_APPLICATION = 'superlists.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if os.getenv('GAE_APPLICATION', None):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/tdddjango:us-central1:tdddjangoproj',
+            'USER': 'tddmain',
+            'PASSWORD': 'TDD123*',
+            'NAME': 'test',
+        }
     }
-}
+elif False:
+    # Connect to cloud database via proxy (for migrations)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '127.0.0.1',
+            'USER': 'tddmain',
+            'PASSWORD': 'TDD123*',
+            'NAME': 'test',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
