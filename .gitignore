@@ -6,3 +6,5 @@ env/
 .vscode/
 /static
 tdddjango-420de1fc5134.json
+*.exe
+*.log

@@ -25,6 +25,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.browser.quit()
 
     def wait_for_row_in_list_table(self, row_text):
+        # todo: refactor this into the wait_for method
         start_time = time.time()
         while True:
             try:
@@ -42,3 +43,13 @@ class FunctionalTest(StaticLiveServerTestCase):
         input_box = self.browser.find_element_by_id('id_new_item')
         input_box.send_keys(item_text)
         input_box.send_keys(Keys.ENTER)
+
+    def wait_for(self, fn):
+        start_time = time.time()
+        while True:
+            try:
+                return fn()
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.25)
