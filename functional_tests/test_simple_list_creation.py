@@ -1,44 +1,7 @@
-import os
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import WebDriverException
-import time
-
-MAX_WAIT = 2
+from .base import FunctionalTest
 
 
-class NewVisitorTest(StaticLiveServerTestCase):
-    def setUp(self):
-        self.browser = webdriver.Chrome()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            self.live_server_url = 'http://' + staging_server
-
-    def tearDown(self):
-        # User leaves website
-        # refresh stops a page forced exit error
-        self.browser.refresh()
-        self.browser.quit()
-
-    def wait_for_row_in_list_table(self, row_text):
-        start_time = time.time()
-        while True:
-            try:
-                table = self.browser.find_element_by_id('id_list_table')
-                rows = table.find_elements_by_tag_name('tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
-                    raise e
-                time.sleep(0.25)
-
-    def enter_new_item(self, item_text):
-        """ Enter value into input box and submit form """
-        input_box = self.browser.find_element_by_id('id_new_item')
-        input_box.send_keys(item_text)
-        input_box.send_keys(Keys.ENTER)
+class NewVisitorTest(FunctionalTest):
 
     def test_can_start_a_list_for_one_user(self):
         # User opens browser and navigates to homepage
@@ -80,7 +43,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # Begin new user session, clearing cookies so first user doesnt impact
         self.browser.refresh()
         self.browser.quit()
-        self.browser = webdriver.Chrome()
+        self.setBrowser()
 
         # OtherUser visits home page
         self.browser.get(self.live_server_url)
@@ -103,12 +66,3 @@ class NewVisitorTest(StaticLiveServerTestCase):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Clean kitchen', page_text)
         self.assertNotIn('Do laundry', page_text)
-
-    def test_layout_and_styling(self):
-        # Smoke test
-        # User goes to home page
-        self.browser.get(self.live_server_url)
-        self.browser.set_window_size(1024, 768)
-        input_box = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(
-            input_box.location['x'] + input_box.size['width']/2, 512, delta=10)
