@@ -28,8 +28,6 @@ class NewVisitorTest(FunctionalTest):
         self.wait_for_row_in_list_table('1. Clean kitchen')
         self.wait_for_row_in_list_table('2. Do laundry')
 
-        self.fail('Finish the test!')
-
     def test_can_start_start_lists_at_different_urls(self):
         # User starts new todo list
         self.browser.get(self.live_server_url)
