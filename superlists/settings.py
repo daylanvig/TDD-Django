@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+if os.getenv('GAE_APPLICATION', None):
+    isProduction = True
+else:
+    isProduction = False
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,8 +30,10 @@ SECRET_KEY = 's&%lgi490r5rqh_s0k&+^83^95$ge&%t%^2198q^(1*ng=4+ui'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
-ALLOWED_HOSTS = ['tdddjango.wl.r.appspot.com']
+if isProduction:
+    ALLOWED_HOSTS = ['tdddjango.wl.r.appspot.com']
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -74,7 +81,7 @@ WSGI_APPLICATION = 'superlists.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-if os.getenv('GAE_APPLICATION', None):
+if isProduction:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',

@@ -24,6 +24,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         # User leaves website
         self.browser.quit()
 
+    def get_item_input_box(self):
+        return self.browser.find_element_by_id('id_text')
+
     def wait_for_row_in_list_table(self, row_text):
         # todo: refactor this into the wait_for method
         start_time = time.time()
@@ -40,7 +43,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def enter_new_item(self, item_text):
         """ Enter value into input box and submit form """
-        input_box = self.browser.find_element_by_id('id_new_item')
+        input_box = self.get_item_input_box()
         input_box.send_keys(item_text)
         input_box.send_keys(Keys.ENTER)
 
