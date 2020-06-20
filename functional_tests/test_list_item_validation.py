@@ -1,4 +1,5 @@
 from .base import FunctionalTest
+from selenium.webdriver.common.keys import Keys
 
 
 class ItemValidationTest(FunctionalTest):
@@ -8,27 +9,28 @@ class ItemValidationTest(FunctionalTest):
         self.browser.get(self.live_server_url)
         self.enter_new_item('')
 
-        # Page refreshes, and there is an error saying item can not be blank
-        self.wait_for(lambda: self.assertEqual(
-            self.browser.find_element_by_css_selector('.has-error').text,
-            "You can't have an empty list item"
-        ))
+        # Browser intercepts invalid request, does not allow submission
+        self.wait_for(
+            lambda: self.browser.find_elements_by_css_selector('#id_text:invalid'))
 
-        # User tries again with text
-        self.enter_new_item('Buy eggs')
+        # She types and error disappears
+        input_box = self.get_item_input_box()
+        input_box.send_keys('Buy eggs')
+        self.wait_for(
+            lambda: self.browser.find_elements_by_css_selector('#id_text:valid'))
+        input_box.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1. Buy eggs')
 
         # User tries again to submit an empty item
         self.enter_new_item('')
-
         # User sees warning again on list page
-        self.wait_for(lambda: self.assertEqual(
-            self.browser.find_element_by_css_selector('.has-error').text,
-            "You can't have an empty list item"
-        ))
+        self.wait_for(
+            lambda: self.browser.find_elements_by_css_selector('#id_text:invalid'))
 
         # User corrects it by filling text in
-        self.enter_new_item('Clean car')
-
+        self.get_item_input_box().send_keys('Clean car')
+        self.wait_for(
+            lambda: self.browser.find_elements_by_css_selector('#id_text:valid'))
+        self.get_item_input_box().send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1. Buy eggs')
         self.wait_for_row_in_list_table('2. Clean car')
